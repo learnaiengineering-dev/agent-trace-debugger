@@ -1,0 +1,14 @@
+agent-trace-debugger
+Copyright (c) 2026 Learn AI Engineering. Licensed under the MIT License (see LICENSE).
+
+This package is an independent implementation. Its span format and timing rules
+(inclusive and own time computed from the union of child intervals, wall time as
+the union of root spans, per-span exclusive token counts, and the before and after
+regression report idea) follow the "Agent Trace Debugger" project in:
+
+  AI Engineering from Scratch
+  https://github.com/rohitg00/ai-engineering-from-scratch
+  Copyright (c) rohitg00, MIT License
+
+No source code from that project is copied into this package.
+

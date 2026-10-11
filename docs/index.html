@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Trace Debugger: docs</title>
+<meta name="description" content="Debug AI agent runs and fail CI when they get worse. Use it as a CLI, a GitHub Action, a Python library, an embeddable widget or a Claude skill. Offline, no dependencies, MIT licensed.">
+<style>
+:root{
+  --bg:#fafaf5; --panel:#ffffff; --ink:#1a1a1a; --muted:#6b6b66; --line:#e4e4dc;
+  --accent:#3553ff; --accent-ink:#ffffff; --good:#2f9e44; --tint:#eef0ff; --code:#f3f3ec;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111114; --panel:#1a1a1f; --ink:#ececf0; --muted:#9a9aa5; --line:#2c2c34;
+    --accent:#8097ff; --accent-ink:#111114; --good:#5fd47a; --tint:#22243a; --code:#202026;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:880px;margin:0 auto;padding:28px 16px 56px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 8px}
+h2{font-size:1.25rem;margin:40px 0 10px}
+h3{font-size:1rem;margin:0 0 6px}
+p{margin:0 0 12px}
+a{color:var(--accent)}
+.lede{color:var(--muted);font-size:1.05rem;max-width:62ch}
+nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0 24px;font-size:.9rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.grid .card{margin:0}
+.grid p{color:var(--muted);font-size:.92rem;margin:0}
+pre{margin:0;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+pre code{background:none;padding:0}
+.snip{position:relative;margin:8px 0 12px}
+.snip button{position:absolute;top:6px;right:6px;font:inherit;font-size:.78rem;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+.snip button:hover{border-color:var(--accent)}
+.snip pre{padding-right:84px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.scroll{overflow-x:auto}
+.ok{color:var(--good);font-weight:700}
+.note{background:var(--tint);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:12px}
+footer{color:var(--muted);font-size:.85rem;margin-top:48px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+<script type="module" src="agent-trace-widget.js"></script>
+<script type="module" src="docs.js"></script>
+</head>
+<body>
+<main>
+  <h1>Agent Trace Debugger</h1>
+  <p class="lede">An agent run can finish in the same time as before and still be worse: one more error, hundreds more tokens spent in failed calls. This tool shows where time and tokens went, compares a run with a baseline, and fails the build when it regresses.</p>
+  <nav aria-label="On this page">
+    <a href="#try">Try it</a><a href="#use">Ways to use it</a><a href="#embed">Embed the widget</a><a href="#enterprise">For your organisation</a><a href="#limits">Limits</a>
+  </nav>
+
+  <h2 id="try">Try it</h2>
+  <p>This run finishes in the same 100&nbsp;ms as its baseline, but one span now fails and burns more tokens. Click a row to inspect a span, or open "Edit the trace" and paste your own spans.</p>
+  <agent-trace editable heading="Agent run vs baseline">
+<script type="application/x-ndjson" data-role="current">
+{"id":"run","name":"Support agent run","start":0,"end":100,"status":"ok","tokens":0}
+{"id":"plan","parent":"run","name":"Plan steps","start":2,"end":18,"status":"ok","tokens":120}
+{"id":"search","parent":"run","name":"Search knowledge base","start":20,"end":60,"status":"ok","tokens":60}
+{"id":"orders","parent":"run","name":"Look up order","start":40,"end":80,"status":"ok","tokens":30}
+{"id":"draft","parent":"run","name":"Draft reply","start":80,"end":95,"status":"error","tokens":500}
+</script>
+<script type="application/x-ndjson" data-role="baseline">
+{"id":"run","name":"Support agent run","start":0,"end":100,"status":"ok","tokens":0}
+{"id":"plan","parent":"run","name":"Plan steps","start":2,"end":18,"status":"ok","tokens":120}
+{"id":"search","parent":"run","name":"Search knowledge base","start":20,"end":60,"status":"ok","tokens":60}
+{"id":"orders","parent":"run","name":"Look up order","start":40,"end":80,"status":"ok","tokens":30}
+{"id":"draft","parent":"run","name":"Draft reply","start":80,"end":95,"status":"ok","tokens":300}
+</script>
+  </agent-trace>
+  <p class="note">Own time is a span's duration minus the union of its children, so parallel work is not double-counted. Tokens must be each span's own usage. Everything runs in your browser and nothing is sent anywhere.</p>
+
+  <h2 id="use">Ways to use it</h2>
+  <div class="grid">
+    <div class="card"><h3>Command line</h3><p>Run it locally or in any CI. Exit code 1 means a limit was exceeded.</p></div>
+    <div class="card"><h3>GitHub Action</h3><p>One step in a workflow. Writes a job summary and an optional HTML timeline.</p></div>
+    <div class="card"><h3>Python library</h3><p>Call <code>analyze()</code> and <code>compare()</code> from your own tooling.</p></div>
+    <div class="card"><h3>Embeddable widget</h3><p>Show a trace and its gate result on your own site, docs or dashboard.</p></div>
+    <div class="card"><h3>Claude skill</h3><p>Let a coding agent run the debugger and explain what changed.</p></div>
+  </div>
+
+  <h3 style="margin-top:20px">Install and run</h3>
+  <div class="snip"><pre><code id="snip-install">pip install agent-trace-debugger</code></pre><button data-copy="snip-install">Copy</button></div>
+  <div class="snip"><pre><code id="snip-cli">trace-debug current.jsonl --baseline baseline.jsonl --max-wall-increase 50 --html report.html
+# exit 0 passed, 1 a limit was exceeded, 2 bad input</code></pre><button data-copy="snip-cli">Copy</button></div>
+
+  <h3>The gate</h3>
+  <div class="scroll"><table>
+    <tr><th>Option</th><th>Default</th><th>Fails when</th></tr>
+    <tr><td><code>--max-new-errors N</code></td><td>0</td><td>There are more than N extra errors compared with the baseline.</td></tr>
+    <tr><td><code>--max-wall-increase MS</code></td><td>off</td><td>Wall time grew by more than MS.</td></tr>
+    <tr><td><code>--max-token-increase N</code></td><td>off</td><td>Total tokens grew by more than N.</td></tr>
+    <tr><td><code>--max-failed-token-increase N</code></td><td>off</td><td>Tokens in failed spans grew by more than N.</td></tr>
+    <tr><td><code>--max-errors N</code></td><td>off</td><td>The absolute error count is above N (works without a baseline).</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:20px">In GitHub Actions</h3>
+  <div class="snip"><pre><code id="snip-action">- uses: actions/checkout@v4
+- uses: learnaiengineering-dev/agent-trace-debugger@v0.1.0
+  with:
+    trace: traces/current.jsonl
+    baseline: traces/baseline.jsonl
+    max-wall-increase: "50"
+    html: trace-report.html</code></pre><button data-copy="snip-action">Copy</button></div>
+
+  <h3>From Python</h3>
+  <div class="snip"><pre><code id="snip-python">from agent_trace_debugger import analyze, compare, parse_trace
+
+current = analyze(parse_trace(open("current.jsonl").read()))
+baseline = analyze(parse_trace(open("baseline.jsonl").read()))
+result = compare(current, baseline, max_wall_increase=50)
+if not result.passed:
+    print("\n".join(result.failures))</code></pre><button data-copy="snip-python">Copy</button></div>
+
+  <h3>As a Claude skill</h3>
+  <p>The skill lives in <a href="https://github.com/learnaiengineering-dev/claude-skills-starter">claude-skills-starter</a>. Copy the folder into your skills directory:</p>
+  <div class="snip"><pre><code id="snip-skill">cp -r skills/agent-trace-review ~/.claude/skills/</code></pre><button data-copy="snip-skill">Copy</button></div>
+
+  <h2 id="embed">Embed the widget</h2>
+  <p>The widget is one JavaScript file with no dependencies. Copy <code>agent-trace-widget.js</code> next to your page (host it yourself; there is no CDN to depend on), then add the element:</p>
+  <div class="snip"><pre><code id="snip-embed">&lt;script type="module" src="/assets/agent-trace-widget.js"&gt;&lt;/script&gt;
+
+&lt;agent-trace heading="Last agent run" max-wall-increase="50"&gt;
+  &lt;script type="application/x-ndjson" data-role="current"&gt;
+{"id":"run","name":"Agent run","start":0,"end":100,"status":"ok","tokens":0}
+  &lt;/script&gt;
+  &lt;script type="application/x-ndjson" data-role="baseline"&gt;
+{"id":"run","name":"Agent run","start":0,"end":98,"status":"ok","tokens":0}
+  &lt;/script&gt;
+&lt;/agent-trace&gt;</code></pre><button data-copy="snip-embed">Copy</button></div>
+  <p>The baseline is optional. Or show a ready-made page in an iframe using <a href="embed.html">embed.html</a>:</p>
+  <div class="snip"><pre><code id="snip-iframe">&lt;iframe src="/assets/embed.html" title="Agent trace" width="100%" height="560" loading="lazy"&gt;&lt;/iframe&gt;</code></pre><button data-copy="snip-iframe">Copy</button></div>
+
+  <h3>Attributes</h3>
+  <div class="scroll"><table>
+    <tr><th>Attribute</th><th>Default</th><th>What it does</th></tr>
+    <tr><td><code>heading</code></td><td>none</td><td>Optional title above the result.</td></tr>
+    <tr><td><code>editable</code></td><td>off</td><td>Adds an "Edit the trace" panel so visitors can paste their own spans.</td></tr>
+    <tr><td><code>theme</code></td><td>auto</td><td><code>light</code> or <code>dark</code>. Auto follows the visitor's system setting.</td></tr>
+    <tr><td><code>max-new-errors</code></td><td>0</td><td>Allowed extra errors compared with the baseline.</td></tr>
+    <tr><td><code>max-wall-increase</code></td><td>none</td><td>Allowed wall-time increase in ms (needs a baseline).</td></tr>
+    <tr><td><code>max-token-increase</code></td><td>none</td><td>Allowed total-token increase (needs a baseline).</td></tr>
+    <tr><td><code>max-failed-token-increase</code></td><td>none</td><td>Allowed increase in tokens spent in failed spans (needs a baseline).</td></tr>
+    <tr><td><code>max-errors</code></td><td>none</td><td>Absolute error limit.</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:20px">Style it to match your site</h3>
+  <p>Set these CSS custom properties on the element or any ancestor:</p>
+  <div class="snip"><pre><code id="snip-css">agent-trace {
+  --at-bg: #ffffff;      --at-ink: #1a1a1a;     --at-muted: #6b6b66;
+  --at-line: #e4e4dc;    --at-accent: #3553ff;  --at-tint: #eef0ff;
+  --at-good: #2f9e44;    --at-bad: #d9480f;
+  --at-ok: #2b8a8a;      --at-ok-wait: #cfe8e8;
+  --at-error: #d9480f;   --at-error-wait: #f8d5c8;
+  --at-radius: 12px;     --at-font: system-ui, sans-serif;
+}</code></pre><button data-copy="snip-css">Copy</button></div>
+
+  <h3>Use it from JavaScript</h3>
+  <div class="snip"><pre><code id="snip-js">const el = document.querySelector("agent-trace");
+el.data = { current: jsonlText, baseline: otherJsonlText };   // text or arrays of span objects
+el.addEventListener("trace-result", (e) =&gt; {
+  console.log(e.detail.gate.passed, e.detail.gate.failures);   // same shape as the Python report
+});
+
+// Or use the logic without the element:
+import { parseTrace, analyze, compare } from "/assets/agent-trace-widget.js";
+const report = compare(analyze(parseTrace(current)), analyze(parseTrace(baseline)), { maxWallIncrease: 50 });</code></pre><button data-copy="snip-js">Copy</button></div>
+  <p>The <code>trace-result</code> event bubbles and carries the report, or <code>null</code> when the input is invalid. The widget's numbers are checked against the Python package with a shared golden file, so both give the same results.</p>
+
+  <h3>Security and content policy</h3>
+  <ul>
+    <li><strong>No network access.</strong> The widget never fetches or sends anything. It only reads the trace you give it.</li>
+    <li><strong>No inline scripts or style attributes in the markup.</strong> Styles come from a constructed stylesheet and positions are set through the DOM, so a strict <code>script-src 'self'</code> policy works. A browser without constructed stylesheets falls back to a <code>&lt;style&gt;</code> element, which a strict <code>style-src</code> policy would block, leaving the widget unstyled.</li>
+    <li><strong>Trace text is never run as HTML.</strong> Span names are untrusted (they can come from model or tool output) and are inserted as plain text.</li>
+    <li><strong>Pin the file.</strong> If you load it from a shared location, add a subresource integrity hash:</li>
+  </ul>
+  <div class="snip"><pre><code id="snip-sri">openssl dgst -sha384 -binary agent-trace-widget.js | openssl base64 -A
+# then: &lt;script type="module" src="..." integrity="sha384-&lt;hash&gt;" crossorigin="anonymous"&gt;&lt;/script&gt;</code></pre><button data-copy="snip-sri">Copy</button></div>
+
+  <h2 id="enterprise">For your organisation</h2>
+  <div class="scroll"><table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Does it send data anywhere?</td><td><span class="ok">No.</span> The CLI and the widget make no network calls and have no telemetry. Traces stay on your machine.</td></tr>
+    <tr><td>Can traces hold sensitive text?</td><td>Yes. Span names and attributes can include prompts or customer data. Redact before sharing a report, and treat trace files like logs.</td></tr>
+    <tr><td>What does it depend on?</td><td>Nothing at runtime: the Python package has no dependencies and the widget is one file.</td></tr>
+    <tr><td>Can it run offline or behind a firewall?</td><td>Yes. Mirror the package on your internal index, or vendor the single widget file.</td></tr>
+    <tr><td>Are results repeatable?</td><td>Yes. The same inputs always give the same numbers and the same HTML report.</td></tr>
+    <tr><td>Is the output stable?</td><td>The JSON report has a <code>schema_version</code> and the exit codes are documented. Pin an exact version in your pipeline.</td></tr>
+    <tr><td>How is it released?</td><td>Published to PyPI from GitHub with trusted publishing, so there is no long-lived upload token to leak.</td></tr>
+    <tr><td>What is the licence?</td><td>MIT. You can use, modify and redistribute it commercially. Keep the licence, the file header and the <a href="https://github.com/learnaiengineering-dev/agent-trace-debugger/blob/main/NOTICE">NOTICE</a>.</td></tr>
+  </table></div>
+
+  <h2 id="limits">Limits</h2>
+  <ul>
+    <li>Token counts must be per span. Cumulative counts would be double-counted in the totals.</li>
+    <li>Clocks from different machines must be normalised before import. OTLP JSON is not read directly.</li>
+    <li>The timeline shows timing as recorded. It does not explain why a span was slow or why a call failed.</li>
+    <li>The widget shows a trace and the gate result. It does not collect traces from your agent.</li>
+  </ul>
+
+  <footer>
+    Built by <a href="https://learnaiengineering.dev">Learn AI Engineering</a>. Source and issues:
+    <a href="https://github.com/learnaiengineering-dev/agent-trace-debugger">GitHub</a>, <a href="https://pypi.org/project/agent-trace-debugger/">PyPI</a>.
+    The span format and timing rules follow the Agent Trace Debugger project in
+    <a href="https://github.com/rohitg00/ai-engineering-from-scratch">AI Engineering from Scratch</a> by rohitg00 (MIT). This is an independent implementation.
+  </footer>
+</main>
+</body>
+</html>

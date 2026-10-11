@@ -1,0 +1,4 @@
+{"id": "run", "name": "Agent run", "start": 0, "end": 100, "status": "ok", "tokens": 0}
+{"id": "a", "parent": "run", "name": "Tool A", "start": 10, "end": 60, "status": "ok", "tokens": 80}
+{"id": "b", "parent": "run", "name": "Tool B", "start": 40, "end": 90, "status": "ok", "tokens": 90}
+

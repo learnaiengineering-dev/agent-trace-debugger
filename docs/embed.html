@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Trace Debugger (embed)</title>
+<meta name="robots" content="noindex">
+<style>
+  html, body { margin: 0; background: transparent; }
+  body { padding: 4px; }
+</style>
+<script type="module" src="agent-trace-widget.js"></script>
+</head>
+<body>
+<!-- Put this page in an iframe, or copy the <agent-trace> element into your own page. -->
+<agent-trace heading="Did the new agent run get worse?">
+<script type="application/x-ndjson" data-role="current">
+{"id":"run","name":"Support agent run","start":0,"end":100,"status":"ok","tokens":0}
+{"id":"plan","parent":"run","name":"Plan steps","start":2,"end":18,"status":"ok","tokens":120}
+{"id":"search","parent":"run","name":"Search knowledge base","start":20,"end":60,"status":"ok","tokens":60}
+{"id":"orders","parent":"run","name":"Look up order","start":40,"end":80,"status":"ok","tokens":30}
+{"id":"draft","parent":"run","name":"Draft reply","start":80,"end":95,"status":"error","tokens":500}
+</script>
+<script type="application/x-ndjson" data-role="baseline">
+{"id":"run","name":"Support agent run","start":0,"end":100,"status":"ok","tokens":0}
+{"id":"plan","parent":"run","name":"Plan steps","start":2,"end":18,"status":"ok","tokens":120}
+{"id":"search","parent":"run","name":"Search knowledge base","start":20,"end":60,"status":"ok","tokens":60}
+{"id":"orders","parent":"run","name":"Look up order","start":40,"end":80,"status":"ok","tokens":30}
+{"id":"draft","parent":"run","name":"Draft reply","start":80,"end":95,"status":"ok","tokens":300}
+</script>
+</agent-trace>
+</body>
+</html>

@@ -1,0 +1,883 @@
+{
+  "invalid": [
+    {
+      "expected": {
+        "kind": "invalid_json",
+        "line": 2
+      },
+      "name": "not json on line 2",
+      "text": "{\"id\": \"a\", \"name\": \"A\", \"start\": 0, \"end\": 10, \"status\": \"ok\", \"tokens\": 0}\nnot json"
+    },
+    {
+      "expected": {
+        "kind": "invalid_span",
+        "line": 1
+      },
+      "name": "missing fields",
+      "text": "{\"id\": \"a\"}"
+    },
+    {
+      "expected": {
+        "kind": "invalid_span",
+        "line": 1
+      },
+      "name": "boolean tokens",
+      "text": "{\"id\": \"a\", \"name\": \"A\", \"start\": 0, \"end\": 1, \"status\": \"ok\", \"tokens\": true}"
+    },
+    {
+      "expected": {
+        "kind": "invalid_span",
+        "line": 1
+      },
+      "name": "end before start",
+      "text": "{\"id\": \"a\", \"name\": \"A\", \"start\": 5, \"end\": 1, \"status\": \"ok\", \"tokens\": 0}"
+    },
+    {
+      "expected": {
+        "kind": "empty",
+        "line": null
+      },
+      "name": "empty trace",
+      "text": "\n  \n"
+    },
+    {
+      "expected": {
+        "kind": "duplicate_id",
+        "line": null
+      },
+      "name": "duplicate ids",
+      "text": "{\"id\": \"a\", \"name\": \"A\", \"start\": 0, \"end\": 10, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"a\", \"name\": \"A\", \"start\": 0, \"end\": 10, \"status\": \"ok\", \"tokens\": 0}"
+    },
+    {
+      "expected": {
+        "kind": "missing_parent",
+        "line": null
+      },
+      "name": "missing parent",
+      "text": "{\"id\": \"a\", \"parent\": \"zz\", \"name\": \"A\", \"start\": 0, \"end\": 1, \"status\": \"ok\", \"tokens\": 0}"
+    },
+    {
+      "expected": {
+        "kind": "cycle",
+        "line": null
+      },
+      "name": "parent cycle",
+      "text": "{\"id\": \"a\", \"parent\": \"b\", \"name\": \"A\", \"start\": 0, \"end\": 1, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"b\", \"parent\": \"a\", \"name\": \"B\", \"start\": 0, \"end\": 1, \"status\": \"ok\", \"tokens\": 0}"
+    },
+    {
+      "expected": {
+        "kind": "outside_parent",
+        "line": null
+      },
+      "name": "child outside parent",
+      "text": "{\"id\": \"a\", \"name\": \"A\", \"start\": 0, \"end\": 10, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"c\", \"parent\": \"a\", \"name\": \"C\", \"start\": 5, \"end\": 20, \"status\": \"ok\", \"tokens\": 0}"
+    }
+  ],
+  "limit_errors": [
+    {
+      "kind": "needs_baseline",
+      "limits": {
+        "max_wall_increase": 5
+      },
+      "name": "increase limit without baseline"
+    },
+    {
+      "kind": "bad_limit",
+      "limits": {
+        "max_errors": -1
+      },
+      "name": "negative limit"
+    }
+  ],
+  "reports": [
+    {
+      "baseline": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"ok\", \"tokens\": 300}\n\n",
+      "current": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"error\", \"tokens\": 500}\n\n",
+      "expected": {
+        "baseline": {
+          "summary": {
+            "errors": 0,
+            "failed_span_tokens": 0,
+            "slowest_own_time": "orders",
+            "total_tokens": 510,
+            "wall_time": 100
+          }
+        },
+        "diff": {
+          "added": [],
+          "errors": 1,
+          "failed_span_tokens": 500,
+          "removed": [],
+          "spans": {
+            "draft": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "error",
+              "status_before": "ok",
+              "tokens": 200
+            },
+            "orders": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "plan": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "run": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "search": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            }
+          },
+          "total_tokens": 200,
+          "wall_time": 0
+        },
+        "gate": {
+          "failures": [
+            "errors rose by 1 (0 -> 1), limit 0"
+          ],
+          "limits": {
+            "max_errors": null,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": null
+          },
+          "passed": false
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 100,
+            "exclusive": 9,
+            "id": "run",
+            "inclusive": 100,
+            "name": "Support agent run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 18,
+            "exclusive": 16,
+            "id": "plan",
+            "inclusive": 16,
+            "name": "Plan steps",
+            "parent": "run",
+            "start": 2,
+            "status": "ok",
+            "tokens": 120
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 40,
+            "id": "search",
+            "inclusive": 40,
+            "name": "Search knowledge base",
+            "parent": "run",
+            "start": 20,
+            "status": "ok",
+            "tokens": 60
+          },
+          {
+            "depth": 1,
+            "end": 80,
+            "exclusive": 40,
+            "id": "orders",
+            "inclusive": 40,
+            "name": "Look up order",
+            "parent": "run",
+            "start": 40,
+            "status": "ok",
+            "tokens": 30
+          },
+          {
+            "depth": 1,
+            "end": 95,
+            "exclusive": 15,
+            "id": "draft",
+            "inclusive": 15,
+            "name": "Draft reply",
+            "parent": "run",
+            "start": 80,
+            "status": "error",
+            "tokens": 500
+          }
+        ],
+        "summary": {
+          "errors": 1,
+          "failed_span_tokens": 500,
+          "slowest_own_time": "orders",
+          "total_tokens": 710,
+          "wall_time": 100
+        }
+      },
+      "limits": {},
+      "name": "example vs baseline"
+    },
+    {
+      "baseline": null,
+      "current": "{\"id\": \"run\", \"name\": \"Agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"a\", \"parent\": \"run\", \"name\": \"Tool A\", \"start\": 10, \"end\": 60, \"status\": \"ok\", \"tokens\": 80}\n{\"id\": \"b\", \"parent\": \"run\", \"name\": \"Tool B\", \"start\": 40, \"end\": 90, \"status\": \"ok\", \"tokens\": 90}\n\n",
+      "expected": {
+        "baseline": null,
+        "diff": null,
+        "gate": {
+          "failures": [],
+          "limits": {
+            "max_errors": null,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": null
+          },
+          "passed": true
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 100,
+            "exclusive": 20,
+            "id": "run",
+            "inclusive": 100,
+            "name": "Agent run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 50,
+            "id": "a",
+            "inclusive": 50,
+            "name": "Tool A",
+            "parent": "run",
+            "start": 10,
+            "status": "ok",
+            "tokens": 80
+          },
+          {
+            "depth": 1,
+            "end": 90,
+            "exclusive": 50,
+            "id": "b",
+            "inclusive": 50,
+            "name": "Tool B",
+            "parent": "run",
+            "start": 40,
+            "status": "ok",
+            "tokens": 90
+          }
+        ],
+        "summary": {
+          "errors": 0,
+          "failed_span_tokens": 0,
+          "slowest_own_time": "a",
+          "total_tokens": 170,
+          "wall_time": 100
+        }
+      },
+      "limits": {},
+      "name": "parallel tools alone"
+    },
+    {
+      "baseline": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"ok\", \"tokens\": 300}\n\n",
+      "current": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"error\", \"tokens\": 500}\n\n",
+      "expected": {
+        "baseline": {
+          "summary": {
+            "errors": 0,
+            "failed_span_tokens": 0,
+            "slowest_own_time": "orders",
+            "total_tokens": 510,
+            "wall_time": 100
+          }
+        },
+        "diff": {
+          "added": [],
+          "errors": 1,
+          "failed_span_tokens": 500,
+          "removed": [],
+          "spans": {
+            "draft": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "error",
+              "status_before": "ok",
+              "tokens": 200
+            },
+            "orders": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "plan": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "run": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "search": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            }
+          },
+          "total_tokens": 200,
+          "wall_time": 0
+        },
+        "gate": {
+          "failures": [
+            "total tokens rose by 200 (510 -> 710), limit 100",
+            "tokens in failed spans rose by 500 (0 -> 500), limit 10"
+          ],
+          "limits": {
+            "max_errors": null,
+            "max_failed_token_increase": 10,
+            "max_new_errors": 1,
+            "max_token_increase": 100,
+            "max_wall_increase": null
+          },
+          "passed": false
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 100,
+            "exclusive": 9,
+            "id": "run",
+            "inclusive": 100,
+            "name": "Support agent run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 18,
+            "exclusive": 16,
+            "id": "plan",
+            "inclusive": 16,
+            "name": "Plan steps",
+            "parent": "run",
+            "start": 2,
+            "status": "ok",
+            "tokens": 120
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 40,
+            "id": "search",
+            "inclusive": 40,
+            "name": "Search knowledge base",
+            "parent": "run",
+            "start": 20,
+            "status": "ok",
+            "tokens": 60
+          },
+          {
+            "depth": 1,
+            "end": 80,
+            "exclusive": 40,
+            "id": "orders",
+            "inclusive": 40,
+            "name": "Look up order",
+            "parent": "run",
+            "start": 40,
+            "status": "ok",
+            "tokens": 30
+          },
+          {
+            "depth": 1,
+            "end": 95,
+            "exclusive": 15,
+            "id": "draft",
+            "inclusive": 15,
+            "name": "Draft reply",
+            "parent": "run",
+            "start": 80,
+            "status": "error",
+            "tokens": 500
+          }
+        ],
+        "summary": {
+          "errors": 1,
+          "failed_span_tokens": 500,
+          "slowest_own_time": "orders",
+          "total_tokens": 710,
+          "wall_time": 100
+        }
+      },
+      "limits": {
+        "max_failed_token_increase": 10,
+        "max_new_errors": 1,
+        "max_token_increase": 100
+      },
+      "name": "allow one error, cap tokens"
+    },
+    {
+      "baseline": "{\"id\": \"run\", \"name\": \"Run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"a\", \"parent\": \"run\", \"name\": \"Fetch\", \"start\": 10, \"end\": 50, \"status\": \"ok\", \"tokens\": 40}\n{\"id\": \"b\", \"parent\": \"run\", \"name\": \"Summarise\", \"start\": 50, \"end\": 90, \"status\": \"ok\", \"tokens\": 60}",
+      "current": "{\"id\": \"run\", \"name\": \"Run\", \"start\": 0, \"end\": 130, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"a\", \"parent\": \"run\", \"name\": \"Fetch\", \"start\": 10, \"end\": 60, \"status\": \"ok\", \"tokens\": 40}\n{\"id\": \"c\", \"parent\": \"run\", \"name\": \"Retry fetch\", \"start\": 60, \"end\": 120, \"status\": \"ok\", \"tokens\": 90}",
+      "expected": {
+        "baseline": {
+          "summary": {
+            "errors": 0,
+            "failed_span_tokens": 0,
+            "slowest_own_time": "a",
+            "total_tokens": 100,
+            "wall_time": 100
+          }
+        },
+        "diff": {
+          "added": [
+            "c"
+          ],
+          "errors": 0,
+          "failed_span_tokens": 0,
+          "removed": [
+            "b"
+          ],
+          "spans": {
+            "a": {
+              "exclusive": 10,
+              "inclusive": 10,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "run": {
+              "exclusive": 0,
+              "inclusive": 30,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            }
+          },
+          "total_tokens": 30,
+          "wall_time": 30
+        },
+        "gate": {
+          "failures": [
+            "wall time rose by 30 ms (100 -> 130), limit 20 ms"
+          ],
+          "limits": {
+            "max_errors": null,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": 20
+          },
+          "passed": false
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 130,
+            "exclusive": 20,
+            "id": "run",
+            "inclusive": 130,
+            "name": "Run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 50,
+            "id": "a",
+            "inclusive": 50,
+            "name": "Fetch",
+            "parent": "run",
+            "start": 10,
+            "status": "ok",
+            "tokens": 40
+          },
+          {
+            "depth": 1,
+            "end": 120,
+            "exclusive": 60,
+            "id": "c",
+            "inclusive": 60,
+            "name": "Retry fetch",
+            "parent": "run",
+            "start": 60,
+            "status": "ok",
+            "tokens": 90
+          }
+        ],
+        "summary": {
+          "errors": 0,
+          "failed_span_tokens": 0,
+          "slowest_own_time": "c",
+          "total_tokens": 130,
+          "wall_time": 130
+        }
+      },
+      "limits": {
+        "max_wall_increase": 20
+      },
+      "name": "slower run with added and removed spans"
+    },
+    {
+      "baseline": null,
+      "current": "{\"id\": \"r1\", \"name\": \"First\", \"start\": 0.5, \"end\": 40.25, \"status\": \"ok\", \"tokens\": 1.5}\n{\"id\": \"r2\", \"parent\": null, \"name\": \"Second\", \"start\": 30, \"end\": 75.75, \"status\": \"error\", \"tokens\": 7}\n{\"id\": \"k\", \"parent\": \"r2\", \"name\": \"Inner\", \"start\": 31.1, \"end\": 60.2, \"status\": \"ok\", \"tokens\": 2.25}\n{\"id\": \"kk\", \"parent\": \"k\", \"name\": \"Deepest\", \"start\": 40, \"end\": 50, \"status\": \"error\", \"tokens\": 0}",
+      "expected": {
+        "baseline": null,
+        "diff": null,
+        "gate": {
+          "failures": [
+            "2 errors, limit 1"
+          ],
+          "limits": {
+            "max_errors": 1,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": null
+          },
+          "passed": false
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 40.25,
+            "exclusive": 39.75,
+            "id": "r1",
+            "inclusive": 39.75,
+            "name": "First",
+            "parent": null,
+            "start": 0.5,
+            "status": "ok",
+            "tokens": 1.5
+          },
+          {
+            "depth": 0,
+            "end": 75.75,
+            "exclusive": 16.65,
+            "id": "r2",
+            "inclusive": 45.75,
+            "name": "Second",
+            "parent": null,
+            "start": 30,
+            "status": "error",
+            "tokens": 7
+          },
+          {
+            "depth": 1,
+            "end": 60.2,
+            "exclusive": 19.1,
+            "id": "k",
+            "inclusive": 29.1,
+            "name": "Inner",
+            "parent": "r2",
+            "start": 31.1,
+            "status": "ok",
+            "tokens": 2.25
+          },
+          {
+            "depth": 2,
+            "end": 50,
+            "exclusive": 10,
+            "id": "kk",
+            "inclusive": 10,
+            "name": "Deepest",
+            "parent": "k",
+            "start": 40,
+            "status": "error",
+            "tokens": 0
+          }
+        ],
+        "summary": {
+          "errors": 2,
+          "failed_span_tokens": 7,
+          "slowest_own_time": "r1",
+          "total_tokens": 10.75,
+          "wall_time": 75.25
+        }
+      },
+      "limits": {
+        "max_errors": 1
+      },
+      "name": "multiple roots, fractions, nesting"
+    },
+    {
+      "baseline": null,
+      "current": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"error\", \"tokens\": 500}\n\n",
+      "expected": {
+        "baseline": null,
+        "diff": null,
+        "gate": {
+          "failures": [
+            "1 errors, limit 0"
+          ],
+          "limits": {
+            "max_errors": 0,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": null
+          },
+          "passed": false
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 100,
+            "exclusive": 9,
+            "id": "run",
+            "inclusive": 100,
+            "name": "Support agent run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 18,
+            "exclusive": 16,
+            "id": "plan",
+            "inclusive": 16,
+            "name": "Plan steps",
+            "parent": "run",
+            "start": 2,
+            "status": "ok",
+            "tokens": 120
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 40,
+            "id": "search",
+            "inclusive": 40,
+            "name": "Search knowledge base",
+            "parent": "run",
+            "start": 20,
+            "status": "ok",
+            "tokens": 60
+          },
+          {
+            "depth": 1,
+            "end": 80,
+            "exclusive": 40,
+            "id": "orders",
+            "inclusive": 40,
+            "name": "Look up order",
+            "parent": "run",
+            "start": 40,
+            "status": "ok",
+            "tokens": 30
+          },
+          {
+            "depth": 1,
+            "end": 95,
+            "exclusive": 15,
+            "id": "draft",
+            "inclusive": 15,
+            "name": "Draft reply",
+            "parent": "run",
+            "start": 80,
+            "status": "error",
+            "tokens": 500
+          }
+        ],
+        "summary": {
+          "errors": 1,
+          "failed_span_tokens": 500,
+          "slowest_own_time": "orders",
+          "total_tokens": 710,
+          "wall_time": 100
+        }
+      },
+      "limits": {
+        "max_errors": 0
+      },
+      "name": "absolute error limit alone"
+    },
+    {
+      "baseline": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"ok\", \"tokens\": 300}\n\n",
+      "current": "{\"id\": \"run\", \"name\": \"Support agent run\", \"start\": 0, \"end\": 100, \"status\": \"ok\", \"tokens\": 0}\n{\"id\": \"plan\", \"parent\": \"run\", \"name\": \"Plan steps\", \"start\": 2, \"end\": 18, \"status\": \"ok\", \"tokens\": 120}\n{\"id\": \"search\", \"parent\": \"run\", \"name\": \"Search knowledge base\", \"start\": 20, \"end\": 60, \"status\": \"ok\", \"tokens\": 60}\n{\"id\": \"orders\", \"parent\": \"run\", \"name\": \"Look up order\", \"start\": 40, \"end\": 80, \"status\": \"ok\", \"tokens\": 30}\n{\"id\": \"draft\", \"parent\": \"run\", \"name\": \"Draft reply\", \"start\": 80, \"end\": 95, \"status\": \"ok\", \"tokens\": 300}\n\n",
+      "expected": {
+        "baseline": {
+          "summary": {
+            "errors": 0,
+            "failed_span_tokens": 0,
+            "slowest_own_time": "orders",
+            "total_tokens": 510,
+            "wall_time": 100
+          }
+        },
+        "diff": {
+          "added": [],
+          "errors": 0,
+          "failed_span_tokens": 0,
+          "removed": [],
+          "spans": {
+            "draft": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "orders": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "plan": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "run": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            },
+            "search": {
+              "exclusive": 0,
+              "inclusive": 0,
+              "status_after": "ok",
+              "status_before": "ok",
+              "tokens": 0
+            }
+          },
+          "total_tokens": 0,
+          "wall_time": 0
+        },
+        "gate": {
+          "failures": [],
+          "limits": {
+            "max_errors": null,
+            "max_failed_token_increase": null,
+            "max_new_errors": 0,
+            "max_token_increase": null,
+            "max_wall_increase": null
+          },
+          "passed": true
+        },
+        "schema_version": 1,
+        "spans": [
+          {
+            "depth": 0,
+            "end": 100,
+            "exclusive": 9,
+            "id": "run",
+            "inclusive": 100,
+            "name": "Support agent run",
+            "parent": null,
+            "start": 0,
+            "status": "ok",
+            "tokens": 0
+          },
+          {
+            "depth": 1,
+            "end": 18,
+            "exclusive": 16,
+            "id": "plan",
+            "inclusive": 16,
+            "name": "Plan steps",
+            "parent": "run",
+            "start": 2,
+            "status": "ok",
+            "tokens": 120
+          },
+          {
+            "depth": 1,
+            "end": 60,
+            "exclusive": 40,
+            "id": "search",
+            "inclusive": 40,
+            "name": "Search knowledge base",
+            "parent": "run",
+            "start": 20,
+            "status": "ok",
+            "tokens": 60
+          },
+          {
+            "depth": 1,
+            "end": 80,
+            "exclusive": 40,
+            "id": "orders",
+            "inclusive": 40,
+            "name": "Look up order",
+            "parent": "run",
+            "start": 40,
+            "status": "ok",
+            "tokens": 30
+          },
+          {
+            "depth": 1,
+            "end": 95,
+            "exclusive": 15,
+            "id": "draft",
+            "inclusive": 15,
+            "name": "Draft reply",
+            "parent": "run",
+            "start": 80,
+            "status": "ok",
+            "tokens": 300
+          }
+        ],
+        "summary": {
+          "errors": 0,
+          "failed_span_tokens": 0,
+          "slowest_own_time": "orders",
+          "total_tokens": 510,
+          "wall_time": 100
+        }
+      },
+      "limits": {},
+      "name": "identical runs"
+    }
+  ]
+}

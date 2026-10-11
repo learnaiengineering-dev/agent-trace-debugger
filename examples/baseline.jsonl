@@ -1,0 +1,6 @@
+{"id": "run", "name": "Support agent run", "start": 0, "end": 100, "status": "ok", "tokens": 0}
+{"id": "plan", "parent": "run", "name": "Plan steps", "start": 2, "end": 18, "status": "ok", "tokens": 120}
+{"id": "search", "parent": "run", "name": "Search knowledge base", "start": 20, "end": 60, "status": "ok", "tokens": 60}
+{"id": "orders", "parent": "run", "name": "Look up order", "start": 40, "end": 80, "status": "ok", "tokens": 30}
+{"id": "draft", "parent": "run", "name": "Draft reply", "start": 80, "end": 95, "status": "ok", "tokens": 300}
+

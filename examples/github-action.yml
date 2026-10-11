@@ -1,0 +1,26 @@
+# Copy to .github/workflows/trace-gate.yml in your repo.
+# Your pipeline must write the current run's trace to traces/current.jsonl. The baseline
+# is usually a trace from the last good run, committed or restored from a cache.
+name: Agent trace gate
+on: [pull_request]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ... run your agent on a fixed task and write traces/current.jsonl ...
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "agent-trace-debugger==0.1.0"
+      - run: >
+          trace-debug traces/current.jsonl --baseline traces/baseline.jsonl
+          --max-wall-increase 50 --github-summary --html trace-report.html --json trace-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trace-report
+          path: |
+            trace-report.html
+            trace-report.json
+

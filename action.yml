@@ -1,0 +1,68 @@
+name: Agent Trace Gate
+description: Fail the job when an agent run gets worse than its baseline (new errors, slower, more tokens).
+author: Learn AI Engineering
+branding:
+  icon: activity
+  color: blue
+inputs:
+  trace:
+    description: JSONL trace of the current run (one span per line).
+    required: true
+  baseline:
+    description: JSONL trace of the previous run. Leave empty to only report.
+    default: ""
+  max-new-errors:
+    description: Allowed extra errors compared with the baseline.
+    default: "0"
+  max-wall-increase:
+    description: Allowed wall-time increase in ms. Leave empty to skip.
+    default: ""
+  max-token-increase:
+    description: Allowed increase in total tokens. Leave empty to skip.
+    default: ""
+  max-failed-token-increase:
+    description: Allowed increase in tokens spent in failed spans. Leave empty to skip.
+    default: ""
+  max-errors:
+    description: Absolute error limit. Leave empty to skip.
+    default: ""
+  html:
+    description: Path to write a self-contained HTML timeline. Leave empty to skip.
+    default: ""
+  version:
+    description: Package version to install from PyPI. Leave empty for the latest.
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Install
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        if [ -n "$VERSION" ]; then
+          python3 -m pip install "agent-trace-debugger==$VERSION"
+        else
+          python3 -m pip install agent-trace-debugger
+        fi
+    - name: Run gate
+      shell: bash
+      env:
+        TRACE: ${{ inputs.trace }}
+        BASELINE: ${{ inputs.baseline }}
+        MAX_NEW_ERRORS: ${{ inputs.max-new-errors }}
+        MAX_WALL: ${{ inputs.max-wall-increase }}
+        MAX_TOKENS: ${{ inputs.max-token-increase }}
+        MAX_FAILED_TOKENS: ${{ inputs.max-failed-token-increase }}
+        MAX_ERRORS: ${{ inputs.max-errors }}
+        HTML: ${{ inputs.html }}
+      run: |
+        args=(--max-new-errors "$MAX_NEW_ERRORS" --github-summary)
+        if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi
+        if [ -n "$MAX_WALL" ]; then args+=(--max-wall-increase "$MAX_WALL"); fi
+        if [ -n "$MAX_TOKENS" ]; then args+=(--max-token-increase "$MAX_TOKENS"); fi
+        if [ -n "$MAX_FAILED_TOKENS" ]; then args+=(--max-failed-token-increase "$MAX_FAILED_TOKENS"); fi
+        if [ -n "$MAX_ERRORS" ]; then args+=(--max-errors "$MAX_ERRORS"); fi
+        if [ -n "$HTML" ]; then args+=(--html "$HTML"); fi
+        trace-debug "$TRACE" "${args[@]}"
+

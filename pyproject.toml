@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-trace-debugger"
+version = "0.1.0"
+description = "Dependency-free trace debugger and CI gate for AI agent runs: own time, wall time, tokens in failed spans, and what changed."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Learn AI Engineering" }]
+keywords = ["agents", "tracing", "observability", "llm", "debugging", "ci", "regression"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Debuggers",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://learnaiengineering.dev"
+Repository = "https://github.com/learnaiengineering-dev/agent-trace-debugger"
+Changelog = "https://github.com/learnaiengineering-dev/agent-trace-debugger/blob/main/CHANGELOG.md"
+
+[project.scripts]
+trace-debug = "agent_trace_debugger.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+agent_trace_debugger = ["py.typed"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
